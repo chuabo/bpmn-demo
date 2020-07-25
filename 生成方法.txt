@@ -1,0 +1,52 @@
+打开https://start.spring.io/，选择Maven Project,Java language,Spring Boot版本为2.0.2,填入Group:com.example,Autifact:bpmdemo,把生成的工程导入idea中，修改pom.xml文件，加入依赖：
+<dependency>
+			<groupId>org.camunda.bpm.springboot</groupId>
+			<artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+修改spring boot的主入口程序，加入注解@EnableProcessApplication
+@SpringBootApplication
+@EnableProcessApplication
+public class CamundabpmApplication {
+   public static void main(String[] args) {
+      SpringApplication.run(CamundabpmApplication.class, args);
+   }
+}
+启动程序，访问http://localhost:8080
+用camunda modeler设计流程test.bpmn，在main/resources下面加入META-INF文件夹，在该文件夹下添加process.xml文件，内容为空。
+在main/resources下面加入application.yaml文件（如果不加该文件，访问时需要创建用户）：
+camunda.bpm:
+  admin-user:
+    id: demo
+    password: demo
+    firstName: demo
+  filter:
+    create: All tasks
+
+把创建的文件放到main/resources下，使用代码启动流程：
+@SpringBootApplication
+@EnableProcessApplication
+public class bpmnDemoApplication{
+@Autowired
+private RuntimeService runtimeService;
+
+public static void main(String[] args){
+SpringApplication.run(bpmndemoApplication.class,args);
+}
+
+@EventListener
+private void processPostDeploy(PostDeployEvent event){
+runtimeService.startProcessInstanceByKey("process1");
+}
+}
